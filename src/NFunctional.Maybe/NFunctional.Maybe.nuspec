@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package>
+    <metadata>
+        <authors>$authors$</authors>
+        <tags>Functional, Maybe, Option, Monad</tags>
+        <projectUrl>https://github.com/maik-hasler/NFunctional</projectUrl>
+        <license type="expression">MIT</license>
+        <repository type="git" url="https://github.com/maik-hasler/NFunctional"/>
+    </metadata>
+</package>

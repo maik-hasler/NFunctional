@@ -1,0 +1,53 @@
+name: NuGet
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+-preview.[0-9]"
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+env:
+  PROJECT_PATHS: |
+    src/NFunctional.Maybe/NFunctional.Maybe.csproj
+    src/NFunctional.Result/NFunctional.Result.csproj
+    src/NFunctional.ValueObject/NFunctional.ValueObject.csproj
+  PACKAGE_OUTPUT_PATH: ${{ github.workspace }}/output
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ["6.0", "7.0", "8.0"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_PATHS }}
+
+      - name: Build projects
+        run: dotnet build ${{ env.PROJECT_PATHS }} --no-restore --configuration Release
+
+      - name: Get Version
+        id: version
+        uses: battila7/get-version-action@v2
+
+      - name: Pack projects
+        run: |
+          for project in ${{ env.PROJECT_PATHS }}; do
+            dotnet pack $project --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_PATH }}
+          done
+
+      - name: Push packages
+        run: |
+          for package in ${{ env.PACKAGE_OUTPUT_PATH }}/*.nupkg; do
+            dotnet nuget push $package -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          done
