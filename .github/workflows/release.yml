@@ -49,11 +49,17 @@ jobs:
       - name: Pack projects
         run: |
           for project in ${{ env.PROJECT_PATHS }}; do
-            dotnet pack $project --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_PATH }}
+            project_name=$(basename $project .csproj)
+            output_path="${{ env.PACKAGE_OUTPUT_PATH }}/$project_name"
+            dotnet pack $project --no-restore --no-build --configuration Release --include-symbols -p:PackageVersion=${{ steps.version.outputs.version-without-v }} --output $output_path
           done
 
       - name: Push packages
         run: |
-          for package in ${{ env.PACKAGE_OUTPUT_PATH }}/*.nupkg; do
-            dotnet nuget push $package -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          for project in ${{ env.PROJECT_PATHS }}; do
+            project_name=$(basename $project .csproj)
+            output_path="${{ env.PACKAGE_OUTPUT_PATH }}/$project_name"
+            for package in $output_path/*.nupkg; do
+              dotnet nuget push $package -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+            done
           done
