@@ -1,0 +1,17 @@
+name: NuGet
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+-preview.[0-9]"
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  publish-github:
+    uses: maik-hasler/Workflows/.github/workflows/publish.yml@main
+    with:
+      project-path: "src/NFunctional.Maybe/NFunctional.Maybe.csproj"
+      nuget-url: "https://nuget.pkg.github.com/maik-hasler/index.json"
+      nuget-api-key: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      packages: write
