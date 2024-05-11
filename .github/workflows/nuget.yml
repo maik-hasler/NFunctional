@@ -12,6 +12,7 @@ jobs:
     with:
       project-path: "src/NFunctional.Maybe/NFunctional.Maybe.csproj"
       nuget-url: "https://nuget.pkg.github.com/maik-hasler/index.json"
+      dotnet-version: 8.0.x
     secrets:
       nuget-api-key: ${{ secrets.GITHUB_TOKEN }}
     permissions:
